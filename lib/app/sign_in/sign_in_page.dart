@@ -1,10 +1,29 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import 'package:time_tracker_flutter_course/app/common_widgets/custom_rasied_button.dart';
 import 'package:time_tracker_flutter_course/app/sign_in/sign_in_button.dart';
 import 'package:time_tracker_flutter_course/app/sign_in/social_sign_in_button.dart';
+import 'package:time_tracker_flutter_course/services/auth.dart';
 
 class SignInPage extends StatelessWidget {
-  const SignInPage({Key key}) : super(key: key);
+  final void Function(User) onSignIn;
+  final AuthBase auth;
+  const SignInPage({
+    Key key,
+    @required this.auth,
+    @required this.onSignIn,
+  }) : super(key: key);
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      final user = await auth.signInAnonymously();
+      // print("userCredential = ${userCredential.user.uid}");
+      onSignIn(user);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,15 +100,11 @@ class SignInPage extends StatelessWidget {
               text: "Go Annonymous",
               textColor: Colors.black,
               color: Colors.lime[300],
-              onPressed: () {},
+              onPressed: _signInWithGoogle,
             )
           ],
         ),
       ),
     );
-  }
-
-  void _signInWithGoogle() {
-    //TODO: Auth witj google
   }
 }
