@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:time_tracker_flutter_course/app/common_widgets/custom_rasied_button.dart';
+import 'custom_rasied_button.dart';
 
 class FormSubmitButton extends CustomRasiedButton {
   FormSubmitButton({
