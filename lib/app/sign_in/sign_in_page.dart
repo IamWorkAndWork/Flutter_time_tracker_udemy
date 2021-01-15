@@ -40,10 +40,11 @@ class SignInPage extends StatelessWidget {
 
   void _signInWithEmail(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            fullscreenDialog: true,
-            builder: (BuildContext context) => EmailSignInPage());
+      context,
+      MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (BuildContext context) => EmailSignInPage()),
+    );
   }
 
   @override
@@ -86,7 +87,7 @@ class SignInPage extends StatelessWidget {
               text: "Sign In With Facebook",
               textColor: Colors.white,
               color: Color(0xff334d92),
-              onPressed: ()=>_signInWithFacebook(context),
+              onPressed: () => _signInWithFacebook(context),
             ),
             SizedBox(
               height: 8.0,
@@ -96,7 +97,7 @@ class SignInPage extends StatelessWidget {
               text: "Sign In With Google",
               textColor: Colors.black,
               color: Colors.white,
-              onPressed: ()=>_signInWithGoogle(context),
+              onPressed: () => _signInWithGoogle(context),
             ),
             SizedBox(
               height: 8.0,
@@ -125,7 +126,7 @@ class SignInPage extends StatelessWidget {
               text: "Go Annonymous",
               textColor: Colors.black,
               color: Colors.lime[300],
-              onPressed:()=> _signInWithAnonymous(context),
+              onPressed: () => _signInWithAnonymous(context),
             )
           ],
         ),
