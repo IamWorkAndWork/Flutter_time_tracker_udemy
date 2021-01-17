@@ -1,22 +1,21 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:time_tracker_flutter_course/app/sign_in/validator.dart';
 import 'package:time_tracker_flutter_course/common_widgets/form_submit_button.dart';
-import 'package:time_tracker_flutter_course/common_widgets/show_alert_dialog.dart';
 import 'package:time_tracker_flutter_course/common_widgets/show_exception_error_dialog.dart';
 import 'package:time_tracker_flutter_course/services/auth.dart';
 
-enum EmailSiginFormType { signIn, register }
+import 'email_sign_model.dart';
 
-class EmailSignInForm extends StatefulWidget with EmailAndPasswordValidators {
+class EmailSignInFormStateFul extends StatefulWidget
+    with EmailAndPasswordValidators {
   @override
-  _EmailSignInFormState createState() => _EmailSignInFormState();
+  _EmailSignInFormStateFulState createState() =>
+      _EmailSignInFormStateFulState();
 }
 
-class _EmailSignInFormState extends State<EmailSignInForm> {
+class _EmailSignInFormStateFulState extends State<EmailSignInFormStateFul> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -38,6 +37,24 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  void _emailEditingCompleted() {
+    final newFocus = widget.emailValidator.isValid(_email)
+        ? _passwordFocusNode
+        : _emailFocusNode;
+    FocusScope.of(context).requestFocus(newFocus);
+  }
+
+  void _toggleFormType() {
+    setState(() {
+      _submitted = false;
+      _formType = _formType == EmailSiginFormType.signIn
+          ? EmailSiginFormType.register
+          : EmailSiginFormType.signIn;
+    });
+    _emailController.clear();
+    _passwordController.clear();
   }
 
   void _submit() async {
@@ -63,24 +80,6 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
         _isLoading = false;
       });
     }
-  }
-
-  void _emailEditingCompleted() {
-    final newFocus = widget.emailValidator.isValid(_email)
-        ? _passwordFocusNode
-        : _emailFocusNode;
-    FocusScope.of(context).requestFocus(newFocus);
-  }
-
-  void _toggleFormType() {
-    setState(() {
-      _submitted = false;
-      _formType = _formType == EmailSiginFormType.signIn
-          ? EmailSiginFormType.register
-          : EmailSiginFormType.signIn;
-    });
-    _emailController.clear();
-    _passwordController.clear();
   }
 
   List<Widget> _buildChildren() {
