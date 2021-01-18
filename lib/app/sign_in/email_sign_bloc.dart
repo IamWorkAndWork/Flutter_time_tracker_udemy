@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:time_tracker_flutter_course/app/sign_in/email_sign_model.dart';
+import 'package:time_tracker_flutter_course/app/sign_in/email_sign_in_model.dart';
 import 'package:time_tracker_flutter_course/services/auth.dart';
 
 class EmailSignInBloc {
@@ -49,7 +49,7 @@ class EmailSignInBloc {
         submitted: false);
   }
 
-  void updatreEmail(String email) {
+  void updateEmail(String email) {
     updateWith(email: email);
   }
 

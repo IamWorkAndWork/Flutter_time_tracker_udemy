@@ -6,7 +6,7 @@ import 'package:time_tracker_flutter_course/common_widgets/form_submit_button.da
 import 'package:time_tracker_flutter_course/common_widgets/show_exception_error_dialog.dart';
 import 'package:time_tracker_flutter_course/services/auth.dart';
 
-import 'email_sign_model.dart';
+import 'email_sign_in_model.dart';
 
 class EmailSignInFormStateFul extends StatefulWidget
     with EmailAndPasswordValidators {
