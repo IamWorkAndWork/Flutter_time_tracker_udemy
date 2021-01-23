@@ -1,8 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:time_tracker_flutter_course/app/home/jobs/edit_job_page.dart';
+import 'package:time_tracker_flutter_course/app/home/jobs/empty_content.dart';
+import 'package:time_tracker_flutter_course/app/home/jobs/list_item_builder.dart';
 import 'package:time_tracker_flutter_course/common_widgets/show_alert_dialog.dart';
+import 'package:time_tracker_flutter_course/common_widgets/show_exception_error_dialog.dart';
 import 'package:time_tracker_flutter_course/services/auth.dart';
 import 'package:time_tracker_flutter_course/services/database.dart';
 import '../models/job.dart';
@@ -28,6 +32,16 @@ class JobsPage extends StatelessWidget {
         cancelActionText: "Cancel");
     if (didRequestSignOut) {
       _signout(context);
+    }
+  }
+
+  Future<void> _delete(BuildContext context, Job job) async {
+    try {
+      final database = Provider.of<Database>(context, listen: false);
+      await database.deleteJob(job);
+    } on FirebaseException catch (e) {
+      showExceptionAlertDialog(context,
+          title: "Operation Failed", exception: e);
     }
   }
 
@@ -83,37 +97,51 @@ class JobsPage extends StatelessWidget {
     return StreamBuilder<List<Job>>(
       stream: database.jobsStream(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final jobs = snapshot.data;
-
-          if (jobs.isEmpty) {
-            return Center(
-              child: Text("No Data"),
-            );
-          }
-
-          final childrens = jobs.map((job) {
-            // print("job data = ${job.name}");
-            return JobListTile(
+        return ListItemBuilder<Job>(
+          snapshot: snapshot,
+          itemBuilder: (context, job) => Dismissible(
+            background: Container(
+              color: Colors.red,
+            ),
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) => _delete(context, job),
+            key: Key('job-${job.id}'),
+            child: JobListTile(
               job: job,
-              onTap: () => EditJobPage.show(
-                context,
-                job: job,
-              ),
-            );
-          }).toList();
-          return ListView(
-            children: childrens,
-          );
-        }
-        if (snapshot.hasError) {
-          return Center(
-            child: Text("Some error occurred"),
-          );
-        }
-        return Center(
-          child: CircularProgressIndicator(),
+              onTap: () => EditJobPage.show(context, job: job),
+            ),
+          ),
         );
+
+        // if (snapshot.hasData) {
+        //   final jobs = snapshot.data;
+
+        //   if (jobs.isEmpty) {
+        //     return EmptyContent();
+        //   } else {
+        //     final childrens = jobs.map((job) {
+        //       // print("job data = ${job.name}");
+        //       return JobListTile(
+        //         job: job,
+        //         onTap: () => EditJobPage.show(
+        //           context,
+        //           job: job,
+        //         ),
+        //       );
+        //     }).toList();
+        //     return ListView(
+        //       children: childrens,
+        //     );
+        //   }
+        // }
+        // if (snapshot.hasError) {
+        //   return Center(
+        //     child: Text("Some error occurred"),
+        //   );
+        // }
+        // return Center(
+        //   child: CircularProgressIndicator(),
+        // );
       },
     );
   }

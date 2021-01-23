@@ -6,15 +6,21 @@ class FirestoreService {
   FirestoreService._();
   static final instance = FirestoreService._();
 
-  Future<void> setData({String path, Map<String, dynamic> data}) async {
+  Future<void> setData({
+    @required String path,
+    @required Map<String, dynamic> data,
+  }) async {
     final reference = FirebaseFirestore.instance.doc(path);
-    print("_setData = : $path : $data");
+    // print("_setData = : $path : $data");
     await reference.set(data);
   }
 
   Stream<List<T>> collectionStream<T>({
     @required String path,
-    @required T Function(Map<String, dynamic> data, String documentId) builder,
+    @required
+        T Function(@required Map<String, dynamic> data,
+                @required String documentId)
+            builder,
   }) {
     final reference = FirebaseFirestore.instance.collection(path);
     final snapshots = reference.snapshots();
@@ -28,5 +34,10 @@ class FirestoreService {
           )
           .toList(),
     );
+  }
+
+  Future<void> deleteJob({@required String path}) async {
+    final reference = FirebaseFirestore.instance.doc(path);
+    await reference.delete();
   }
 }
