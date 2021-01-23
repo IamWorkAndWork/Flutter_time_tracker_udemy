@@ -14,11 +14,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Provider<AuthBase>(
-        create: (context) => Auth(),
-        child: MaterialApp(
-          title: "Time Tracker",
-          theme: ThemeData(primarySwatch: Colors.indigo),
-          home: LandingPage(),
-        ));
+      create: (context) => Auth(),
+      child: MaterialApp(
+        title: "Time Tracker",
+        theme: ThemeData(primarySwatch: Colors.indigo),
+        home: LandingPage(),
+      ),
+    );
   }
 }
