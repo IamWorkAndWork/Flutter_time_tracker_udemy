@@ -1,22 +1,26 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
+import 'package:time_tracker_flutter_course/app/home/models/entry.dart';
 import 'package:time_tracker_flutter_course/app/home/models/job.dart';
 import 'package:time_tracker_flutter_course/services/api_path.dart';
-import 'package:time_tracker_flutter_course/services/fire_store_service.dart';
+import 'package:time_tracker_flutter_course/services/firestore_service.dart';
 
 abstract class Database {
   Future<void> setJob(Job job);
-  Stream<List<Job>> jobsStream();
   Future<void> deleteJob(Job job);
+  Stream<List<Job>> jobsStream();
+  Stream<Job> jobStream({@required String jobId});
+  Future<void> setEntry(Entry entry);
+  Future<void> deleteEntry(Entry entry);
+  Stream<List<Entry>> entriesStream({Job job});
 }
 
 String documentIdFromCurrentDate() => DateTime.now().toIso8601String();
 
 class FirestoreDatabase implements Database {
-  final String uid;
-  final _service = FirestoreService.instance;
-
   FirestoreDatabase({@required this.uid}) : assert(uid != null);
+  final String uid;
+
+  final _service = FirestoreService.instance;
 
   @override
   Future<void> setJob(Job job) => _service.setData(
@@ -24,51 +28,50 @@ class FirestoreDatabase implements Database {
         data: job.toMap(),
       );
 
-  // Future<void> _setData({String path, Map<String, dynamic> data}) async {
-  //   final reference = FirebaseFirestore.instance.doc(path);
-  //   print("_setData = : $path : $data");
-  //   await reference.set(data);
-  // }
+  @override
+  Future<void> deleteJob(Job job) async {
+    //delete when entry.jobId = job.jobId
+    final allEntries = await entriesStream(job: job).first;
+    for (Entry entry in allEntries) {
+      if (entry.jobId == job.id) {
+        await deleteEntry(entry);
+      }
+    }
+
+    //delete job
+    await _service.deleteData(path: APIPath.job(uid, job.id));
+  }
+
+  @override
+  Future<void> setEntry(Entry entry) => _service.setData(
+        path: APIPath.entry(uid, entry.id),
+        data: entry.toMap(),
+      );
+
   @override
   Stream<List<Job>> jobsStream() => _service.collectionStream(
-      path: APIPath.jobs(uid),
-      builder: (data, documentId) => Job.fromMap(data, documentId));
-  // {
-  //   final path = APIPath.jobs(uid);
-  //   final reference = FirebaseFirestore.instance.collection(path);
-  //   final snapshots = reference.snapshots();
-  //   // snapshots.listen((snapshot) {
-  //   //   snapshot.docs.forEach((item) {
-  //   //     print("readJobs : ${item.id} | ${item.data()}");
-  //   //   });
-  //   // });
-  //   return snapshots.map(
-  //     (snapshot) => snapshot.docs
-  //         .map(
-  //           (snapshot) => Job.fromMap(snapshot.data()),
-  //         )
-  //         .toList(),
-  //   );
-  // }
-
-  // Stream<List<T>> _collectionStream<T>({
-  //   @required String path,
-  //   @required T Function(Map<String, dynamic> data) builder,
-  // }) {
-  //   final reference = FirebaseFirestore.instance.collection(path);
-  //   final snapshots = reference.snapshots();
-  //   return snapshots.map(
-  //     (snapshot) => snapshot.docs
-  //         .map(
-  //           (snapshot) => builder(
-  //             snapshot.data(),
-  //           ),
-  //         )
-  //         .toList(),
-  //   );
-  // }
+        path: APIPath.jobs(uid),
+        builder: (data, documentId) => Job.fromMap(data, documentId),
+      );
 
   @override
-  Future<void> deleteJob(Job job) =>
-      _service.deleteJob(path: APIPath.job(uid, job.id));
+  Future<void> deleteEntry(Entry entry) =>
+      _service.deleteData(path: APIPath.entry(uid, entry.id));
+
+  @override
+  Stream<List<Entry>> entriesStream({Job job}) =>
+      _service.collectionStream<Entry>(
+        path: APIPath.entries(uid),
+        queryBuilder: job != null
+            ? (query) => query.where('jobId', isEqualTo: job.id)
+            : null,
+        builder: (data, documentID) => Entry.fromMap(data, documentID),
+        sort: (lhs, rhs) => rhs.start.compareTo(lhs.start),
+      );
+
+  @override
+  Stream<Job> jobStream({@required String jobId}) => _service.documentStream(
+        path: APIPath.job(uid, jobId),
+        builder: (data, documentID) => Job.fromMap(data, documentID),
+      );
 }
